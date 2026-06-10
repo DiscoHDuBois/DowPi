@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.ppg" alt="DowPi — CLI tool for converting PDF to Markdown" width="380">
+  <img src="logo.png" alt="DowPi — CLI tool for converting PDF to Markdown" width="380">
 </p>
 
 # DowPi

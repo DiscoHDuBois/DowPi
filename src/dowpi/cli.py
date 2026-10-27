@@ -84,7 +84,15 @@ def _parse_pages(ctx, param, value):
     is_flag=True,
     help="Non rimuovere header/footer ripetuti e numeri di pagina.",
 )
-def main(pdf_path, output, pages_spec, images, image_dir, image_format, image_dpi, keep_headers):
+@click.option(
+    "--ocr",
+    is_flag=True,
+    help="OCR sulle pagine senza testo selezionabile (PDF scansionati). Richiede Tesseract; "
+    "le immagini delle pagine passate in OCR non vengono estratte.",
+)
+def main(
+    pdf_path, output, pages_spec, images, image_dir, image_format, image_dpi, keep_headers, ocr
+):
     """Converte PDF in Markdown ottimizzato per gli LLM."""
     output = output or pdf_path.with_suffix(".md")
     image_dir = image_dir or output.with_name(output.stem + "_images")
@@ -101,6 +109,7 @@ def main(pdf_path, output, pages_spec, images, image_dir, image_format, image_dp
                 image_format=image_format,
                 image_dpi=image_dpi,
                 strip_repeated=not keep_headers,
+                ocr=ocr,
             )
     except ValueError as exc:
         raise click.ClickException(str(exc)) from exc
@@ -113,3 +122,5 @@ def main(pdf_path, output, pages_spec, images, image_dir, image_format, image_dp
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(markdown, encoding="utf-8")
     click.echo(f"{output} scritto (~{len(markdown) // 4} token)", err=True)
+    if not markdown and not ocr:
+        click.echo("nessun testo estratto: se il PDF è scansionato, riprova con --ocr", err=True)

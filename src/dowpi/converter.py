@@ -18,6 +18,7 @@ def convert_pdf(
     min_image_size: float = 0.05,
     image_format: str = "png",
     image_dpi: int = 150,
+    ocr: bool = False,
 ) -> str:
     pdf_path = Path(pdf_path)
     if write_images and image_dir is None:
@@ -33,7 +34,8 @@ def convert_pdf(
                 )
         page_rects = [page.rect for page in doc]
 
-    options = {"pages": pages, "page_chunks": True, "show_progress": False}
+    # OCR spento di default
+    options = {"pages": pages, "page_chunks": True, "show_progress": False, "use_ocr": ocr}
     if not write_images:
         chunks = pymupdf4llm.to_markdown(str(pdf_path), **options)
         return clean([chunk["text"] for chunk in chunks], strip_repeated=strip_repeated)

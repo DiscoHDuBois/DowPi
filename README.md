@@ -27,7 +27,11 @@ dowpi documento.pdf -p 1-5,8         # converte solo alcune pagine
 dowpi documento.pdf --no-images      # non estrarre le immagini
 dowpi documento.pdf --keep-headers   # mantieni header/footer ripetuti
 dowpi documento.pdf --image-format jpg --image-dpi 96   # immagini più leggere
+dowpi scansione.pdf --ocr            # PDF scansionati (richiede Tesseract)
 ```
+
+L'OCR è spento di default: quando è attivo, pymupdf4llm passa in OCR anche le pagine con
+foto o screenshot, e le immagini di quelle pagine non vengono estratte.
 
 Il Markdown va nel file di output; i messaggi (avanzamento, OCR) vanno su stderr.
 

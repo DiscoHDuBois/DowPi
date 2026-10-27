@@ -4,6 +4,7 @@ import click
 
 from dowpi import __version__
 from dowpi.converter import convert_pdf
+from dowpi.images import relink_images
 
 
 def _parse_pages(ctx, param, value):
@@ -83,8 +84,7 @@ def main(pdf_path, output, pages_spec, images, image_dir, keep_headers):
         raise click.ClickException(str(exc)) from exc
 
     if images:
-        for prefix in (str(image_dir.resolve()), str(image_dir)):
-            markdown = markdown.replace(prefix + "/", image_dir.name + "/")
+        markdown = relink_images(markdown, image_dir, output.parent)
         if image_dir.is_dir() and not any(image_dir.iterdir()):
             image_dir.rmdir()
 

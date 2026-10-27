@@ -7,8 +7,6 @@ import pymupdf4llm
 from dowpi.images import dedupe_images, drop_small_images, image_stem, publish_images
 from dowpi.postprocess import clean
 
-_IMAGE_DPI = 150
-
 
 def convert_pdf(
     pdf_path: str | Path,
@@ -18,6 +16,8 @@ def convert_pdf(
     image_dir: str | Path | None = None,
     strip_repeated: bool = True,
     min_image_size: float = 0.05,
+    image_format: str = "png",
+    image_dpi: int = 150,
 ) -> str:
     pdf_path = Path(pdf_path)
     if write_images and image_dir is None:
@@ -41,7 +41,12 @@ def convert_pdf(
     # le immagini passano da una cartella temporanea: in image_dir finiscono solo quelle tenute
     with tempfile.TemporaryDirectory(prefix="dowpi-") as staging:
         chunks = pymupdf4llm.to_markdown(
-            str(pdf_path), write_images=True, image_path=staging, dpi=_IMAGE_DPI, **options
+            str(pdf_path),
+            write_images=True,
+            image_path=staging,
+            image_format=image_format,
+            dpi=image_dpi,
+            **options,
         )
         page_numbers = [chunk["metadata"]["page_number"] for chunk in chunks]
         page_texts = [chunk["text"] for chunk in chunks]
@@ -49,7 +54,7 @@ def convert_pdf(
             page_texts,
             staging,
             [page_rects[n - 1] for n in page_numbers],
-            dpi=_IMAGE_DPI,
+            dpi=image_dpi,
             min_fraction=min_image_size,
         )
         page_texts = dedupe_images(page_texts, staging, drop_repeated=strip_repeated)

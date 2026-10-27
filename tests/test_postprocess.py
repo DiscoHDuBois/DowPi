@@ -3,19 +3,19 @@ from dowpi.postprocess import clean
 
 def test_clean_removes_omitted_picture_placeholders():
     pages = [
-        "## Titolo\n\n**==> picture [300 x 225] <==**\n\ntesto\n",
-        "**==> picture [612.0 x 79.5] <==**\n\n",
+        "## Titolo\n\n**==> picture [300 x 225] intentionally omitted <==**\n\ntesto\n",
+        "**==> picture [612.0 x 79.5] intentionally omitted <==**\n\n",
     ]
     assert clean(pages) == "## Titolo\n\ntesto\n"
 
 
 def test_clean_keeps_text_mentioning_pictures():
-    page = "picture [1] omessa nel testo originale.\n"
+    page = "La picture [1] è intentionally omitted nel testo originale.\n"
     assert clean([page]) == page
 
 
 _START = "**----- Start of picture text -----**<br>\n"
-_END = "**----- = End of picture text = -----**<br>\n"
+_END = "**----- End of picture text -----**<br>\n"
 
 
 def test_picture_text_becomes_labelled_blockquote():

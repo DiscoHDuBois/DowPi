@@ -1,6 +1,9 @@
+import contextlib
+import sys
 from pathlib import Path
 
 import click
+import pymupdf
 
 from dowpi import __version__
 from dowpi.converter import convert_pdf
@@ -63,23 +66,42 @@ def _parse_pages(ctx, param, value):
     help="Cartella per le immagini estratte. [default: <output>_images]",
 )
 @click.option(
+    "--image-format",
+    type=click.Choice(["png", "jpg"]),
+    default="png",
+    show_default=True,
+    help="Formato delle immagini estratte: jpg pesa molto meno sulle foto.",
+)
+@click.option(
+    "--image-dpi",
+    type=click.IntRange(36, 600),
+    default=150,
+    show_default=True,
+    help="Risoluzione delle immagini estratte.",
+)
+@click.option(
     "--keep-headers",
     is_flag=True,
     help="Non rimuovere header/footer ripetuti e numeri di pagina.",
 )
-def main(pdf_path, output, pages_spec, images, image_dir, keep_headers):
+def main(pdf_path, output, pages_spec, images, image_dir, image_format, image_dpi, keep_headers):
     """Converte PDF in Markdown ottimizzato per gli LLM."""
     output = output or pdf_path.with_suffix(".md")
     image_dir = image_dir or output.with_name(output.stem + "_images")
 
+    # i messaggi di pymupdf e pymupdf4llm vanno su stderr: stdout resta solo per l'output
+    pymupdf.set_messages(stream=sys.stderr)
     try:
-        markdown = convert_pdf(
-            pdf_path,
-            pages=pages_spec,
-            write_images=images,
-            image_dir=image_dir if images else None,
-            strip_repeated=not keep_headers,
-        )
+        with contextlib.redirect_stdout(sys.stderr):
+            markdown = convert_pdf(
+                pdf_path,
+                pages=pages_spec,
+                write_images=images,
+                image_dir=image_dir if images else None,
+                image_format=image_format,
+                image_dpi=image_dpi,
+                strip_repeated=not keep_headers,
+            )
     except ValueError as exc:
         raise click.ClickException(str(exc)) from exc
 
